@@ -11,7 +11,7 @@ public class Graph {
     }
 
     public void addNode(){
-        if(nodes.length >= size){
+        if(nodes.length == size){
             Node[] newNodes = new Node[Math.max(1, nodes.length) * 2];
             System.arraycopy(nodes, 0, newNodes, 0, nodes.length);
             nodes = newNodes;

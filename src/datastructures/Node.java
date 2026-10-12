@@ -5,7 +5,7 @@ class Node{
     public int size = 0;
 
     void add(Edge e){
-        if(adjacency.length >= size){
+        if(adjacency.length == size){
             Edge[] newAdj = new Edge[Math.max(1, adjacency.length) * 2];
             System.arraycopy(adjacency, 0, newAdj, 0, adjacency.length);
             adjacency = newAdj;
