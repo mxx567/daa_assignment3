@@ -6,6 +6,14 @@ public class Graph {
     public int size = 0;
 
 
+    private void checkVertex(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(
+                    "Invalid vertex: " + index + ", vertex count: " + size
+            );
+        }
+    }
+
     public Graph(boolean isDirected){
         this.isDirected = isDirected;
     }
@@ -21,6 +29,9 @@ public class Graph {
     }
 
     public void addEdge(int from, int to, int weight) {
+        checkVertex(from);
+        checkVertex(to);
+
         get(from).add(new Edge(to, weight));
 
         if (!isDirected) {
@@ -29,6 +40,7 @@ public class Graph {
     }
 
     Node get(int index){
+        checkVertex(index);
         return nodes[index];
     }
 

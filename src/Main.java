@@ -7,6 +7,8 @@ public class Main {
         g.addNode();
         g.addNode();
         g.addEdge(0,1,3);
+        g.addEdge(0,9999,3);
+
         g.view();
     }
 }
