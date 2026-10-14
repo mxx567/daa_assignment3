@@ -4,6 +4,9 @@ public class Graph {
     Node[] nodes = new Node[0];
     public boolean isDirected = false;
     public int size = 0;
+    DynamicArray<Edge> mstEdges = new DynamicArray<>(new Edge[0]);
+
+    DisjointSetUnion dsu = new DisjointSetUnion();
 
 
     private void checkVertex(int index) {
@@ -25,6 +28,7 @@ public class Graph {
             nodes = newNodes;
         }
         nodes[size] = new Node();
+        dsu.make_set(size);
         size++;
     }
 
@@ -32,10 +36,10 @@ public class Graph {
         checkVertex(from);
         checkVertex(to);
 
-        get(from).add(new Edge(to, weight));
+        get(from).add(new Edge(from, to, weight));
 
         if (!isDirected) {
-            get(to).add(new Edge(from, weight));
+            get(to).add(new Edge(to, from, weight));
         }
     }
 
@@ -51,6 +55,55 @@ public class Graph {
                 nodes[i].getAdjacency();
             }
         }
+    }
+
+
+    public Edge[] getSortedEdges() {
+        int count = 0;
+
+        for (int i = 0; i < size; i++) {
+            Node node = nodes[i];
+
+            for (int j = 0; j < node.size; j++) {
+                Edge edge = node.adjacency[j];
+
+                if (isDirected || i < edge.to) {
+                    count++;
+                }
+            }
+        }
+
+        Edge[] edges = new Edge[count];
+        int index = 0;
+
+        for (int i = 0; i < size; i++) {
+            Node node = nodes[i];
+
+            for (int j = 0; j < node.size; j++) {
+                Edge edge = node.adjacency[j];
+
+                if (isDirected || i < edge.to) {
+                    edges[index++] = edge;
+                }
+            }
+        }
+
+        java.util.Arrays.sort(edges, (a, b) -> Integer.compare(a.weight, b.weight));
+
+        return edges;
+    }
+
+    public int Kruskal(Edge[] e){
+        int totalWeight = 0;
+        for (Edge edge : e) {
+            if (dsu.find_set(edge.from) != dsu.find_set(edge.to)) {
+                mstEdges.add(edge);
+                totalWeight += edge.weight;
+
+                dsu.union_sets(edge.from, edge.to);
+            }
+        }
+        return totalWeight;
     }
 }
 
