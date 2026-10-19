@@ -1,5 +1,8 @@
 package datastructures;
 
+import java.util.PriorityQueue;
+import java.util.Stack;
+
 public class Graph {
     Node[] nodes = new Node[0];
     public boolean isDirected = false;
@@ -167,6 +170,52 @@ public class Graph {
             }
         }
     }
+
+
+    public int[] Kahn(){
+        int[] indegree = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            Node node = nodes[i];
+            for (int j = 0; j < node.size; j++) {
+                Edge edge = node.adjacency[j];
+                indegree[edge.to]++;
+            }
+        }
+
+        java.util.PriorityQueue<Integer> pq = new PriorityQueue<>();
+        for(int i = 0; i < size; i++){
+            if(indegree[i] == 0){
+                pq.add(i);
+            }
+        }
+
+
+        int index = 0;
+        int[] ord = new int[size];
+        while(!pq.isEmpty()){
+            int at = pq.poll();
+            ord[index++] = at;
+
+            Node node = nodes[at];
+
+            for (int i = 0; i < node.size; i++) {
+                Edge edge = node.adjacency[i];
+
+                indegree[edge.to]--;
+
+                if (indegree[edge.to] == 0) {
+                    pq.add(edge.to);
+                }
+            }
+        }
+        if(index != size){
+            System.out.println("Graph contains a cycle");
+            return null;
+        }
+        return ord;
+    }
+
 
 
 }
