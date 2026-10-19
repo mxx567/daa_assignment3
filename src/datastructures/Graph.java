@@ -216,7 +216,84 @@ public class Graph {
         return ord;
     }
 
+    public void Kosaraju(){
 
+        boolean[] visited = new boolean[size];
+
+        java.util.Stack<Integer> stack = new Stack<>();
+
+        for(int v = 0; v < size; v++){
+            if(!visited[v]){
+                DFSkosaraju(v, visited, stack);
+            }
+        }
+
+        Graph rev = reverse();
+
+        visited = new boolean[size];
+
+        while(!stack.isEmpty()){
+            int v = stack.pop();
+            if(!visited[v]){
+                DFS(v,rev,visited);
+                System.out.println();
+            }
+        }
+    }
+
+
+    private void DFSkosaraju(
+            int node, boolean[] visited, Stack<Integer> stack) {
+
+        visited[node] = true;
+        Node current = nodes[node];
+
+        for (int i = 0; i < current.size; i++) {
+            Edge edge = current.adjacency[i];
+
+            if (!visited[edge.to]) {
+                DFSkosaraju(edge.to, visited, stack);
+            }
+        }
+
+        stack.push(node);
+    }
+
+    public void DFS(int node, Graph graph, boolean[] visited) {
+        visited[node] = true;
+        System.out.print(node + " ");
+
+        Node current = graph.nodes[node];
+
+        for (int i = 0; i < current.size; i++) {
+            Edge edge = current.adjacency[i];
+
+            if (!visited[edge.to]) {
+                DFS(edge.to, graph, visited);
+            }
+        }
+    }
+
+
+    private Graph reverse() {
+        Graph reversed = new Graph(true);
+
+        for (int i = 0; i < size; i++) {
+            reversed.addNode();
+        }
+
+        for (int i = 0; i < size; i++) {
+            Node node = nodes[i];
+
+            for (int j = 0; j < node.size; j++) {
+                Edge edge = node.adjacency[j];
+
+                reversed.addEdge(edge.to, i, edge.weight);
+            }
+        }
+
+        return reversed;
+    }
 
 }
 
