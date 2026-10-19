@@ -3,6 +3,7 @@ package datastructures;
 class Node{
     Edge[] adjacency = new Edge[0];
     public int size = 0;
+    private boolean isVisited;
 
     void add(Edge e){
         if(adjacency.length == size){
@@ -20,5 +21,13 @@ class Node{
                 System.out.println("to: " + e.to + " weight: " + e.weight);
             }
         }
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
+    }
+
+    public boolean getVisited(){
+        return isVisited;
     }
 }

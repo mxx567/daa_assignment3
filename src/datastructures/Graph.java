@@ -105,6 +105,70 @@ public class Graph {
         }
         return totalWeight;
     }
+
+    public long prim(int start) {
+        if (isDirected) {
+            throw new IllegalStateException("Prim requires an undirected graph");
+        }
+
+        if (start < 0 || start >= size) {
+            throw new IndexOutOfBoundsException("Invalid starting vertex: " + start);
+        }
+
+        boolean[] visited = new boolean[size];
+
+        java.util.PriorityQueue<Edge> queue =
+                new java.util.PriorityQueue<>(
+                        (a, b) -> Integer.compare(a.weight, b.weight)
+                );
+
+        DynamicArray<Edge> mstEdges = new DynamicArray<>(new Edge[0]);
+        long totalWeight = 0;
+        int visitedCount = 1;
+
+        visited[start] = true;
+        addCandidateEdges(start, visited, queue);
+
+        while (!queue.isEmpty() && visitedCount < size) {
+            Edge edge = queue.poll();
+
+            if (visited[edge.to]) {
+                continue;
+            }
+            mstEdges.add(edge);
+            totalWeight += edge.weight;
+
+            visited[edge.to] = true;
+            visitedCount++;
+
+            addCandidateEdges(edge.to, visited, queue);
+        }
+
+        if (visitedCount != size) {
+            System.out.println("Graph is disconnected. No spanning tree exists.");
+            return 0;
+        }
+
+        return totalWeight;
+    }
+
+    private void addCandidateEdges(
+            int vertex,
+            boolean[] visited,
+            java.util.PriorityQueue<Edge> queue) {
+
+        Node node = nodes[vertex];
+
+        for (int i = 0; i < node.size; i++) {
+            Edge edge = node.adjacency[i];
+
+            if (!visited[edge.to]) {
+                queue.offer(edge);
+            }
+        }
+    }
+
+
 }
 
 
