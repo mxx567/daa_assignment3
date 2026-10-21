@@ -242,8 +242,7 @@ public class Graph {
     }
 
 
-    private void DFSkosaraju(
-            int node, boolean[] visited, Stack<Integer> stack) {
+    private void DFSkosaraju(int node, boolean[] visited, Stack<Integer> stack) {
 
         visited[node] = true;
         Node current = nodes[node];
@@ -295,6 +294,100 @@ public class Graph {
         return reversed;
     }
 
+    public void dijkstra(int start) {
+        checkVertex(start);
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < nodes[i].size; j++) {
+                if (nodes[i].adjacency[j].weight < 0) {
+                    throw new IllegalArgumentException(
+                            "Dijkstra requires non-negative weights"
+                    );
+                }
+            }
+        }
+
+        long[] distance = new long[size];
+        int[] previous = new int[size];
+
+        java.util.Arrays.fill(distance, Long.MAX_VALUE);
+        java.util.Arrays.fill(previous, -1);
+
+        java.util.PriorityQueue<VertexDist> queue =
+                new java.util.PriorityQueue<>(
+                        (a, b) -> Long.compare(a.cur_dist, b.cur_dist)
+                );
+
+        distance[start] = 0;
+        queue.offer(new VertexDist(start, 0));
+
+        while (!queue.isEmpty()) {
+            VertexDist state = queue.poll();
+            int current = state.node;
+
+            if (state.cur_dist != distance[current]) {
+                continue;
+            }
+
+            Node node = nodes[current];
+
+            for (int i = 0; i < node.size; i++) {
+                Edge edge = node.adjacency[i];
+
+                long newDistance = distance[current] + edge.weight;
+
+                if (newDistance < distance[edge.to]) {
+                    distance[edge.to] = newDistance;
+                    previous[edge.to] = current;
+
+                    queue.offer(
+                            new VertexDist(edge.to, newDistance)
+                    );
+                }
+            }
+        }
+
+        for (int v = 0; v < size; v++) {
+            if (distance[v] == Long.MAX_VALUE) {
+                System.out.println(v + ": unreachable");
+            } else {
+                System.out.print(
+                        v + ": distance = " + distance[v] + ", path = "
+                );
+
+                printPath(v, previous);
+                System.out.println();
+            }
+        }
+    }
+
+    private void printPath(int vertex, int[] previous) {
+        java.util.List<Integer> path = new java.util.ArrayList<>();
+
+        for (int at = vertex; at != -1; at = previous[at]) {
+            path.add(at);
+        }
+
+        java.util.Collections.reverse(path);
+
+        for (int i = 0; i < path.size(); i++) {
+            if (i > 0) {
+                System.out.print(" -> ");
+            }
+
+            System.out.print(path.get(i));
+        }
+    }
+
+    private class VertexDist{
+        int node;
+        long cur_dist;
+
+        VertexDist(int node, long cur_dist){
+            this.node = node;
+            this.cur_dist = cur_dist;
+        }
+    }
 }
 
 
