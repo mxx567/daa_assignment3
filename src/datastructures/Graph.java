@@ -4,6 +4,19 @@ import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class Graph {
+    public boolean quiet = false;
+    public long edgeChecks;
+
+    public long[] lastDistances;
+    public int[] lastPrevious;
+
+    public java.util.List<java.util.List<Integer>> lastComponents;
+    private java.util.List<Integer> component;
+
+    private void resetMetrics() {
+        edgeChecks = 0;
+    }
+
     Node[] nodes = new Node[0];
     public boolean isDirected = false;
     public int size = 0;
@@ -62,6 +75,7 @@ public class Graph {
 
 
     public Edge[] getSortedEdges() {
+        resetMetrics();
         int count = 0;
 
         for (int i = 0; i < size; i++) {
@@ -69,7 +83,7 @@ public class Graph {
 
             for (int j = 0; j < node.size; j++) {
                 Edge edge = node.adjacency[j];
-
+                edgeChecks++;
                 if (isDirected || i < edge.to) {
                     count++;
                 }
@@ -84,7 +98,7 @@ public class Graph {
 
             for (int j = 0; j < node.size; j++) {
                 Edge edge = node.adjacency[j];
-
+                edgeChecks++;
                 if (isDirected || i < edge.to) {
                     edges[index++] = edge;
                 }
@@ -96,9 +110,18 @@ public class Graph {
         return edges;
     }
 
-    public int Kruskal(Edge[] e){
+    public int Kruskal(Edge[] e) {
+        if (isDirected) {
+            throw new IllegalStateException("Undirected graph required");
+        }
+        dsu = new DisjointSetUnion();
+        mstEdges = new DynamicArray<>(new Edge[0]);
+        for (int i = 0; i < size; i++) {
+            dsu.make_set(i);
+        }
         int totalWeight = 0;
         for (Edge edge : e) {
+            edgeChecks++;
             if (dsu.find_set(edge.from) != dsu.find_set(edge.to)) {
                 mstEdges.add(edge);
                 totalWeight += edge.weight;
@@ -117,6 +140,7 @@ public class Graph {
         if (start < 0 || start >= size) {
             throw new IndexOutOfBoundsException("Invalid starting vertex: " + start);
         }
+        resetMetrics();
 
         boolean[] visited = new boolean[size];
 
@@ -148,23 +172,21 @@ public class Graph {
         }
 
         if (visitedCount != size) {
-            System.out.println("Graph is disconnected. No spanning tree exists.");
+            if (!quiet) {
+                System.out.println("Graph is disconnected. No spanning tree exists.");
+            }
             return 0;
         }
-
         return totalWeight;
     }
 
-    private void addCandidateEdges(
-            int vertex,
-            boolean[] visited,
-            java.util.PriorityQueue<Edge> queue) {
-
+    private void addCandidateEdges(int vertex,  boolean[] visited, java.util.PriorityQueue<Edge> queue) {
         Node node = nodes[vertex];
+
 
         for (int i = 0; i < node.size; i++) {
             Edge edge = node.adjacency[i];
-
+            edgeChecks++;
             if (!visited[edge.to]) {
                 queue.offer(edge);
             }
@@ -173,12 +195,14 @@ public class Graph {
 
 
     public int[] Kahn(){
+        resetMetrics();
         int[] indegree = new int[size];
 
         for (int i = 0; i < size; i++) {
             Node node = nodes[i];
             for (int j = 0; j < node.size; j++) {
                 Edge edge = node.adjacency[j];
+                edgeChecks++;
                 indegree[edge.to]++;
             }
         }
@@ -201,7 +225,7 @@ public class Graph {
 
             for (int i = 0; i < node.size; i++) {
                 Edge edge = node.adjacency[i];
-
+                edgeChecks++;
                 indegree[edge.to]--;
 
                 if (indegree[edge.to] == 0) {
@@ -209,14 +233,19 @@ public class Graph {
                 }
             }
         }
-        if(index != size){
-            System.out.println("Graph contains a cycle");
+        if (index != size) {
+            if (!quiet) {
+                System.out.println("Graph contains a cycle");
+            }
+
             return null;
         }
         return ord;
     }
 
     public void Kosaraju(){
+        resetMetrics();
+        lastComponents = new java.util.ArrayList<>();
 
         boolean[] visited = new boolean[size];
 
@@ -232,11 +261,16 @@ public class Graph {
 
         visited = new boolean[size];
 
-        while(!stack.isEmpty()){
+        while (!stack.isEmpty()) {
             int v = stack.pop();
-            if(!visited[v]){
-                DFS(v,rev,visited);
-                System.out.println();
+            if (!visited[v]) {
+                component = new java.util.ArrayList<>();
+                DFS(v, rev, visited);
+                lastComponents.add(component);
+
+                if (!quiet) {
+                    System.out.println();
+                }
             }
         }
     }
@@ -260,13 +294,19 @@ public class Graph {
 
     public void DFS(int node, Graph graph, boolean[] visited) {
         visited[node] = true;
-        System.out.print(node + " ");
 
+        if (component != null) {
+            component.add(node);
+        }
+
+        if (!quiet) {
+            System.out.print(node + " ");
+        }
         Node current = graph.nodes[node];
 
         for (int i = 0; i < current.size; i++) {
             Edge edge = current.adjacency[i];
-
+            edgeChecks++;
             if (!visited[edge.to]) {
                 DFS(edge.to, graph, visited);
             }
@@ -297,8 +337,13 @@ public class Graph {
     public void dijkstra(int start) {
         checkVertex(start);
 
+        resetMetrics();
+
+
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nodes[i].size; j++) {
+                edgeChecks++;
+
                 if (nodes[i].adjacency[j].weight < 0) {
                     throw new IllegalArgumentException(
                             "Dijkstra requires non-negative weights"
@@ -333,6 +378,7 @@ public class Graph {
 
             for (int i = 0; i < node.size; i++) {
                 Edge edge = node.adjacency[i];
+                edgeChecks++;
 
                 long newDistance = distance[current] + edge.weight;
 
@@ -348,6 +394,14 @@ public class Graph {
         }
 
         for (int v = 0; v < size; v++) {
+
+            lastDistances = distance;
+            lastPrevious = previous;
+
+            if (quiet) {
+                return;
+            }
+
             if (distance[v] == Long.MAX_VALUE) {
                 System.out.println(v + ": unreachable");
             } else {

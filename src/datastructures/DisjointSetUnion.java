@@ -1,6 +1,8 @@
 package datastructures;
 
 public class DisjointSetUnion {
+    public long findCalls, unionCalls;
+
     public int[] parent = new int[0];
     int[] size = new int[0];
     int len;
@@ -39,21 +41,25 @@ public class DisjointSetUnion {
     }
 
     public void union_sets(int a, int b) {
+        unionCalls++;
         a = find_set(a);
         b = find_set(b);
         if (a != b) {
-            if (size[a] < size[b]){
-                int t = size[a];
-                size[a] = size[b];
-                size[b] = t;
+            if (size[a] < size[b]) {
+                int t = a;
+                a = b;
+                b = t;
             }
             parent[b] = a;
             size[a] += size[b];
         }
     }
+
     public int find_set(int v) {
-        if (v == parent[v])
+        findCalls++;
+        if (v == parent[v]) {
             return v;
+        }
         return parent[v] = find_set(parent[v]);
     }
 
