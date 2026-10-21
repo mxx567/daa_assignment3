@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Experiments {
     private static final int RUNS = 5, WARMUPS = 3;
-    private static final long SEED = 42;
+    private static final long SEED = 56;
     private static volatile long sink;
 
     public static void run() throws IOException {

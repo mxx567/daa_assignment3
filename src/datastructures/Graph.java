@@ -114,6 +114,8 @@ public class Graph {
         if (isDirected) {
             throw new IllegalStateException("Undirected graph required");
         }
+        int acceptedEdges = 0;
+
         dsu = new DisjointSetUnion();
         mstEdges = new DynamicArray<>(new Edge[0]);
         for (int i = 0; i < size; i++) {
@@ -122,12 +124,19 @@ public class Graph {
         int totalWeight = 0;
         for (Edge edge : e) {
             edgeChecks++;
+
             if (dsu.find_set(edge.from) != dsu.find_set(edge.to)) {
                 mstEdges.add(edge);
+                acceptedEdges++;
+
                 totalWeight += edge.weight;
 
                 dsu.union_sets(edge.from, edge.to);
             }
+        }
+
+        if (acceptedEdges != size - 1) {
+            throw new IllegalStateException("Graph is disconnected");
         }
         return totalWeight;
     }
@@ -172,10 +181,7 @@ public class Graph {
         }
 
         if (visitedCount != size) {
-            if (!quiet) {
-                System.out.println("Graph is disconnected. No spanning tree exists.");
-            }
-            return 0;
+            throw new IllegalStateException("Graph is disconnected");
         }
         return totalWeight;
     }
